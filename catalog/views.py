@@ -17,7 +17,7 @@ from .serializers import ItemSerializer, CategorySerializer, TagSerializer
 @permission_classes((AllowAny, ))
 @renderer_classes([SwaggerUIRenderer, OpenAPIRenderer])
 def schema_view(request):
-    generator = schemas.SchemaGenerator(title='LumenConcept API Docs',
+    generator = schemas.SchemaGenerator(title='LumenConcept Catalog API Docs',
                                         patterns=urls.api_url_patterns,
                                         url='/api/v1/')
     return response.Response(generator.get_schema())
