@@ -39,7 +39,7 @@ class Item(models.Model):
     code = models.CharField('Code', max_length=20, blank=False, null=False)
     name = models.CharField('Name', max_length=50, blank=False)
     description = models.TextField('Description', blank=True)
-    image = models.ImageField('Image', upload_to='images/')
+    image = models.ImageField('Image', upload_to='images/', null=True)
     score = models.DecimalField('Score', max_digits=3,
                                  decimal_places=2, default=0.00,
                                  blank=False
