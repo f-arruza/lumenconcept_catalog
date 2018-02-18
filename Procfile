@@ -1,0 +1,1 @@
+web: DJANGO_SETTINGS_MODULE=lumenconcept_catalog.settings gunicorn lumenconcept_catalog.wsgi
