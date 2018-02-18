@@ -27,12 +27,27 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
 
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'name', 'description', 'category',
+    )
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'name', 'description',
+    )
+
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'name',
+    )
