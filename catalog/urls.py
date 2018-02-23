@@ -7,6 +7,9 @@ api_url_patterns = [
                                            'get': 'list',
                                            'post': 'create',
                                           }), name='items-list'),
+    url(r'^items/filter/$', ItemViewSet.as_view({
+                                           'post': 'retrive_list',
+                                          }), name='items-list-filter'),
     url(r'^items/(?P<pk>[0-9]+)$', ItemViewSet.as_view({
                                                    'get': 'retrieve',
                                                    'put': 'update',

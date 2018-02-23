@@ -1,5 +1,6 @@
 from catalog import urls
 
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 
 from rest_framework import viewsets
@@ -43,6 +44,22 @@ class ItemViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         else:
             return Response(serializer.data)
+
+    def retrive_list(self, request):
+        param = request.data
+        try:
+            items = param['items']
+            queryset = Item.objects.filter(pk__in=items)
+
+            serializer = ItemDetailsSerializer(queryset, many=True)
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                return self.get_paginated_response(serializer.data)
+            else:
+                return Response(serializer.data)
+        except:
+            response = { 'error' : 'Solicitud incorrecta.' }
+            return JsonResponse(response, safe=False)
 
     def retrieve(self, request, pk=None):
         queryset = Item.objects.all()
