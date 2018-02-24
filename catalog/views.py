@@ -52,11 +52,7 @@ class ItemViewSet(viewsets.ModelViewSet):
             queryset = Item.objects.filter(pk__in=items)
 
             serializer = ItemDetailsSerializer(queryset, many=True)
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                return self.get_paginated_response(serializer.data)
-            else:
-                return Response(serializer.data)
+            return Response(serializer.data)
         except:
             response = { 'error' : 'Solicitud incorrecta.' }
             return JsonResponse(response, safe=False)

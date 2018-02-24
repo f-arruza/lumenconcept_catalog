@@ -1,0 +1,17 @@
+docker build -t lumenconcept-catalog:v1 .
+
+docker login
+export DOCKER_ID_USER="farruza"
+docker tag lumenconcept-catalog:v2 $DOCKER_ID_USER/lumenconcept-catalog
+docker push $DOCKER_ID_USER/lumenconcept-catalog
+
+
+kubectl get services
+kubectl get deployments
+kubectl get nodes
+kubectl get pods --output=wide
+
+kubectl apply -f lumenconcep-catalog.yml
+
+kubectl delete services lumenconcept-catalog-svc
+kubectl delete deployment lumenconcept-catalog-svc

@@ -108,7 +108,7 @@ USE_TZ = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
