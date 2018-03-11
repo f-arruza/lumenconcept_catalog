@@ -6,14 +6,18 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework import filters
 from rest_framework import response, schemas
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
 from rest_framework.decorators import api_view, renderer_classes, permission_classes
 
-from .models import (Category, Tag, Item)
-from .serializers import (ItemSerializer, CategorySerializer, TagSerializer,
-                          ItemDetailsSerializer, CategoryDetailsSerializer)
+from .utils import send_message_sqs
+from .models import (Category, Tag, Catalog, Offer, OfferItem, MediaResource)
+from .serializers import (CategorySerializer, TagSerializer, CatalogSerializer,
+                          OfferSerializer, OfferItemSerializer,
+                          MediaResourceSerializer, OfferDetailSerializer,
+                          OfferCreateSerializer)
 
 
 @api_view()
@@ -26,75 +30,98 @@ def schema_view(request):
     return response.Response(generator.get_schema())
 
 
-class ItemViewSet(viewsets.ModelViewSet):
-    serializer_class = ItemSerializer
-    queryset = Item.objects.all()
-
-    filter_backends = (filters.SearchFilter,)
-    search_fields = (
-        'name', 'description', 'category',
-    )
-
-    def list(self, request):
-        queryset = Item.objects.filter(active=True)
-
-        serializer = ItemDetailsSerializer(self.queryset, many=True)
-        page = self.paginate_queryset(self.queryset)
-        if page is not None:
-            return self.get_paginated_response(serializer.data)
-        else:
-            return Response(serializer.data)
-
-    def retrive_list(self, request):
-        param = request.data
-        try:
-            items = param['items']
-            queryset = Item.objects.filter(pk__in=items)
-
-            serializer = ItemDetailsSerializer(queryset, many=True)
-            return Response(serializer.data)
-        except:
-            response = { 'error' : 'Solicitud incorrecta.' }
-            return JsonResponse(response, safe=False)
-
-    def retrieve(self, request, pk=None):
-        queryset = Item.objects.all()
-        item = get_object_or_404(queryset, pk=pk)
-        serializer = ItemDetailsSerializer(item)
-        return Response(serializer.data)
-
-
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
-    queryset = Category.objects.all()
+    queryset = Category.objects.filter(active=True)
 
     filter_backends = (filters.SearchFilter,)
     search_fields = (
         'name', 'description',
     )
 
-    def list(self, request):
-        queryset = Category.objects.filter(active=True)
 
-        serializer = CategoryDetailsSerializer(self.queryset, many=True)
+class TagViewSet(viewsets.ModelViewSet):
+    serializer_class = TagSerializer
+    queryset = Tag.objects.filter(active=True)
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'name',
+    )
+
+
+class CatalogViewSet(viewsets.ModelViewSet):
+    serializer_class = CatalogSerializer
+    queryset = Catalog.objects.filter(active=True)
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'name', 'description',
+    )
+
+
+class OfferItemViewSet(viewsets.ModelViewSet):
+    serializer_class = OfferItemSerializer
+    queryset = OfferItem.objects.all()
+
+
+class MediaResourceViewSet(viewsets.ModelViewSet):
+    serializer_class = MediaResourceSerializer
+    queryset = MediaResource.objects.all()
+
+
+class OfferViewSet(viewsets.ModelViewSet):
+    serializer_class = OfferSerializer
+    queryset = Offer.objects.all()
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = (
+        'title', 'description', 'tags',
+    )
+
+    def list(self, request):
+        queryset = Offer.objects.filter(active=True)
+
+        serializer = OfferSerializer(self.queryset, many=True)
         page = self.paginate_queryset(self.queryset)
         if page is not None:
             return self.get_paginated_response(serializer.data)
         else:
             return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
-        queryset = Category.objects.all()
-        categ = get_object_or_404(queryset, pk=pk)
-        serializer = CategoryDetailsSerializer(categ)
+    def destroy(self, request, pk=None):
+        queryset = Offer.objects.all()
+        offer = get_object_or_404(queryset, pk=pk)
+        offer.active = False
+        offer.save()
+
+        registry_detail = {
+            "offer_code": str(offer.code)
+        }
+        print(registry_detail)
+        # Publicar en SQS (catalog_append)
+        send_message_sqs('catalog_remove', str(registry_detail))
+
+        serializer = OfferSerializer(offer)
         return Response(serializer.data)
 
+    def create(self, request):
+        serializer = OfferCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors)
 
-class TagViewSet(viewsets.ModelViewSet):
-    serializer_class = TagSerializer
-    queryset = Tag.objects.all()
+        obj = serializer.save()
+        serializer = OfferDetailSerializer(obj)
+        return Response(serializer.data)
 
-    filter_backends = (filters.SearchFilter,)
-    search_fields = (
-        'name',
-    )
+    def retrieve(self, request, pk=None):
+        queryset = Offer.objects.all()
+        offer = get_object_or_404(queryset, pk=pk)
+        serializer = OfferDetailSerializer(offer)
+        return Response(serializer.data)
+
+    def retrieve_code(self, request, code):
+        queryset = Offer.objects.filter(code=code, active=True)
+        offer = get_object_or_404(queryset)
+        serializer = OfferDetailSerializer(offer)
+        return Response(serializer.data)
