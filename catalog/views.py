@@ -24,7 +24,7 @@ from .serializers import (CategorySerializer, TagSerializer, CatalogSerializer,
 @permission_classes((AllowAny, ))
 @renderer_classes([SwaggerUIRenderer, OpenAPIRenderer])
 def schema_view(request):
-    generator = schemas.SchemaGenerator(title='LumenConcept Catalog API Docs',
+    generator = schemas.SchemaGenerator(title='LumenConcept Catalog/Offer API Docs',
                                         patterns=urls.api_url_patterns,
                                         url='/api/v1/')
     return response.Response(generator.get_schema())
@@ -96,11 +96,12 @@ class OfferViewSet(viewsets.ModelViewSet):
         offer.save()
 
         registry_detail = {
-            "offer_code": str(offer.code)
+            "id": str(offer.id)
         }
-        print(registry_detail)
+
         # Publicar en SQS (catalog_append)
         send_message_sqs('catalog_remove', str(registry_detail))
+        print(registry_detail)
 
         serializer = OfferSerializer(offer)
         return Response(serializer.data)

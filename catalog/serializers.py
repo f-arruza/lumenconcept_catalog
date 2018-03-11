@@ -166,6 +166,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
 
                 registry_detail = {
                     "type": "CATALOG_SEARCH",
+                    "id": str(offer.id),
                     "catalog_name": offer.catalog.name,
                     "catalog_description": offer.catalog.description,
                     "catalog_category": offer.catalog.category.name,
@@ -203,6 +204,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
 
                 # Publicar en SQS (catalog_append)
                 send_message_sqs('catalog_append', str(registry_detail))
+                print(registry_detail)
                 return offer
         except DatabaseError:
             raise serializers.ValidationError("Error when trying to register the offer.")
