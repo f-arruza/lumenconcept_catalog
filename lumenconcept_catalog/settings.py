@@ -129,6 +129,7 @@ MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
 
 AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+AWS_REGION = 'us-east-1'
 
 # STATIC_URL = '/static/'
 # STATIC_ROOT = BASE_DIR + '/static/'
