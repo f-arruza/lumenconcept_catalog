@@ -12,7 +12,7 @@ def offer_verification():
         try:
             order_code = payload['order_code']
             offers = payload['offers']
-            success = "false"
+            success = "true"
             details = []
 
             if len(offers)==0:
@@ -20,6 +20,7 @@ def offer_verification():
                     "code": "0",
                     "error": "BAD_REQUEST"
                 }
+                success = "false"
                 details.append(detail)
             else:
                 for offer in offers:
@@ -29,8 +30,8 @@ def offer_verification():
                             "code": offer['code'],
                             "error": "NOT_FOUND"
                         }
+                        success = "false"
                         details.append(detail)
-                success = "true"
             response = {
                 "order_code": order_code,
                 "success": success,
