@@ -6,4 +6,4 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lumenconcept_catalog.settings")
 
 application = get_wsgi_application()
 
-offer_verification()
+# offer_verification()
